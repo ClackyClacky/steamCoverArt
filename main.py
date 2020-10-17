@@ -4,9 +4,8 @@ import requests
 import shutil
 from configparser import ConfigParser
 from requests.adapters import HTTPAdapter
+from pathlib import Path
 steam_install_path = r"C:\Program Files (x86)\Steam"
-user_path = ''.join([steam_install_path, r'\userdata'])
-grid_cache = ''.join([steam_install_path, r'\appcache\librarycache'])
 
 
 config = ConfigParser()
@@ -14,17 +13,23 @@ config = ConfigParser()
 config.read('settings.ini')
 
 
-STEAM_API_KEY = config.get('keys','steam_api_key')
+STEAM_API_KEY = config.get('keys', 'steam_api_key')
 STEAM_ID = config.get('ids', 'steam_full_id')
-STEAM_GRID_API_KEY = config.get('keys','steamgrid_api_key')
+STEAM_GRID_API_KEY = config.get('keys', 'steamgrid_api_key')
 STEAM_PROFILE_ID = config.get('ids', 'steam_profile_id')
-URL = ''.join(['http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=',
+STEAM_GRID_PATH = config.get('paths', 'steam_grid_path')
+STYLES = config.get('settings', 'styles')
+NSFW = config.get('settings', 'nsfw')
+HUMOR = config.get('settings', 'humor')
+TYPES = config.get('settings', 'types')
+DIMENSIONS = config.get('settings', 'dimensions')
+def get_owned_games():
+    steam_api_url = ''.join(['http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=',
                    STEAM_API_KEY,
                    '&steamid=',
                    str(STEAM_ID),
-                    '&format=json'])
-def get_owned_games():
-    dictonary_of_games = json.loads(requests.get(URL).text)
+                   '&format=json'])
+    dictonary_of_games = json.loads(requests.get(steam_api_url).text)
     game_count = dictonary_of_games['response']['game_count']
     appids_to_scan =[game['appid'] for game in dictonary_of_games['response']['games']]
     appids_to_scan = sorted(appids_to_scan)
@@ -76,27 +81,29 @@ def steam_to_griddb_id(list_to_grab):
     return dict_map, list_of_grid_ids
 
 def get_grids(l,id_map):
-    options = {"dimensions": "600x900", "types": "static", "nsfw": False, "humor": False}
+    options = {"dimensions": DIMENSIONS, "types": TYPES, "nsfw": NSFW, "humor": HUMOR}
     grids = []
     s = requests.Session()
     s.headers.update({"Authorization": f"Bearer {STEAM_GRID_API_KEY}"})
-    s.mount("https://www.steamgriddb.com/api/v2",HTTPAdapter(max_retries=50))
+    s.mount("https://www.steamgriddb.com/api/v2", HTTPAdapter(max_retries=50))
     for game in l:
-        r = s.get(''.join(["https://www.steamgriddb.com/api/v2/grids/game/", str(game)]), stream=True)
+        r = s.get(''.join(["https://www.steamgriddb.com/api/v2/grids/game/", str(game)]), params=options, stream=True)
         r = json.loads(r.text)
         if r['data']:
             r = r['data'][0]
             r = r['url']
             r = s.get(r, stream=True)
-            with open(''.join([r"C:\Program Files (x86)\Steam\userdata", "\\", STEAM_PROFILE_ID,  "\config\grid", '\\', str(id_map[game]), 'p', '.png']), "wb") as f:
+            grid_path = '\\'.join([STEAM_GRID_PATH, STEAM_PROFILE_ID,  "config\grid\\"])
+            Path(grid_path).mkdir(parents=True, exist_ok=True)
+            with open(''.join([grid_path, str(id_map[game]), 'p', '.png']), "wb") as f:
                 f.write(r.content)
         else:
             print("No result for", str(id_map[game]))
     return None
 
-get_grids([5250672],{5250672: 242150})
-games, count = get_owned_games()
-no_default_art_list = get_no_arts(games, count)
-id_map, list_to_download = steam_to_griddb_id(no_default_art_list)
-get_grids(list_to_download, id_map)
+if __name__ == '__main__':
+    games, count = get_owned_games()
+    no_default_art_list = get_no_arts(games, count)
+    id_map, list_to_download = steam_to_griddb_id(no_default_art_list)
+    get_grids(list_to_download, id_map)
 
