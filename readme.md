@@ -60,7 +60,9 @@ steam_grid_path = C:\Program Files (x86)\Steam\userdata
 ;Filter results by style. Multiple styles can be provided as comma separated strings.
 styles = alternate
 
-;Items Enum:"460x215" "920x430" "600x900" "342x482" "660x930"
+; Grids options:"460x215" "920x430" "600x900" "342x482" "660x930"
+; Heroes options: "1920x620" "3840x1240" "1600x650" 
+; logos options: this option is ignored for logos.
 ;Filter results by image dimensions. Multiple dimensions can be provided as comma separated strings.
 dimensions = 600x900
 
