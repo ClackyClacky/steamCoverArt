@@ -36,5 +36,42 @@ Settings.ini
 ============
 This file is used to store different constants.
 
-You will need to fill out the `keys` and `ids` section yourself with your own information, 
-and the others can be tweaked to your preferences,
+You will need to make a copy of the `settings_blank.ini` file and rename it to `settings.ini`
+
+```ini
+[keys]
+; get from https://www.steamgriddb.com/profile/preferences when logged in, no quotes please around value
+steamgrid_api_key =
+; get from https://steamcommunity.com/dev/apikey, no quotes around value
+steam_api_key =
+
+[ids]
+; get from the calculator on https://steamdb.info/calculator/, it's in the steamID field , no quotes
+steam_full_id =
+; get from the calculator, the number in the AccountID , no quotes
+steam_profile_id =
+
+[paths]
+; only change if yours is different
+steam_grid_path = C:\Program Files (x86)\Steam\userdata
+
+[settings]
+;Items Enum:"alternate" "blurred" "white_logo" "material" "no_logo"
+;Filter results by style. Multiple styles can be provided as comma separated strings.
+styles = alternate
+
+;Items Enum:"460x215" "920x430" "600x900" "342x482" "660x930"
+;Filter results by image dimensions. Multiple dimensions can be provided as comma separated strings.
+dimensions = 600x900
+
+;items Enum:"static" "animated"
+;Filter results by image type. Multiple types can be provided as comma separated strings.
+types = static
+;string
+;Set to false to filter out nsfw, true to only include nsfw, any to include both.
+nsfw = false
+
+;humor
+;Set to false to filter out humor, true to only include humor, any to include both.
+humor = false
+```
