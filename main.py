@@ -6,8 +6,6 @@ import requests
 from requests.adapters import HTTPAdapter
 from tqdm import tqdm
 
-steam_install_path = r"C:\Program Files (x86)\Steam"
-
 config = ConfigParser()
 
 config.read('settings.ini')
@@ -102,12 +100,12 @@ def steam_to_griddb_id(list_to_grab):
     s = requests.Session()
     s.headers.update({"Authorization": f"Bearer {STEAM_GRID_API_KEY}"})
     s.mount("https://www.steamgriddb.com/api/v2", HTTPAdapter(max_retries=50))
-    progress = tqdm(list_to_grab)
+    progress = tqdm(list_to_grab, position=0, leave=True)
     for id in progress:
         r = s.get(''.join(["https://www.steamgriddb.com/api/v2/games/steam/", str(id)]))
         dump = json.loads(r.text)
         if dump['success'] == True:
-            progress.set_postfix_str(
+            progress.set_description(
                 f"Game Name : {dump['data']['name']} steam ID {id} , grid_db id is {dump['data']['id']}")
             list_of_steam_ids.append(id)
             list_of_grid_ids.append(dump['data']['id'])
